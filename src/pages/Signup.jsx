@@ -1,11 +1,14 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 
 export default function Signup() {
-    const [form, setForm] = useState({ name: '', email: '', password: '', role: 'worker' })
+    const [params] = useSearchParams()
+    const [form, setForm] = useState({
+        name: '', email: '', password: '',
+        role: params.get('role') === 'poster' ? 'poster' : 'worker',
+    })
     const [error, setError] = useState('')
     const [busy, setBusy] = useState(false)
     const navigate = useNavigate()

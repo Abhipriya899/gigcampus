@@ -1,20 +1,21 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { useAuth } from './AuthContext'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 
-function Protected({ children }) {
+function Home() {
   const { user } = useAuth()
-  return user ? children : <Navigate to="/login" />
+  return user ? <Dashboard /> : <Landing />
 }
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/" element={<Protected><Dashboard /></Protected>} />
     </Routes>
   )
 }

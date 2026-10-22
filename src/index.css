@@ -1,1 +1,185 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+    name: "gigcampus";
+    default: true;
+    color-scheme: light;
+    --color-base-100: #ffffff;
+    --color-base-200: #f2f3ff;
+    --color-base-300: #dae2fd;
+    --color-base-content: #131b2e;
+    --color-primary: #3525cd;
+    --color-primary-content: #ffffff;
+    --color-secondary: #855300;
+    --color-secondary-content: #ffffff;
+    --color-accent: #006e4b;
+    --color-accent-content: #ffffff;
+    --color-neutral: #283044;
+    --color-neutral-content: #eef0ff;
+    --color-info: #4f46e5;
+    --color-info-content: #ffffff;
+    --color-success: #006e4b;
+    --color-success-content: #ffffff;
+    --color-warning: #fea619;
+    --color-warning-content: #4a2c00;
+    --color-error: #ba1a1a;
+    --color-error-content: #ffffff;
+    --radius-selector: 1rem;
+    --radius-field: 0.75rem;
+    --radius-box: 1rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+}
+
+@theme {
+    /* ---- Stitch colours ---- */
+    --color-surface-bright: #faf8ff;
+    --color-inverse-on-surface: #eef0ff;
+    --color-on-secondary-fixed: #2a1700;
+    --color-outline-variant: #c7c4d8;
+    --color-secondary-fixed: #ffddb8;
+    --color-on-secondary-fixed-variant: #653e00;
+    --color-on-primary-fixed-variant: #3323cc;
+    --color-on-tertiary-container: #67f4b7;
+    --color-secondary-container: #fea619;
+    --color-secondary: #855300;
+    --color-on-error: #ffffff;
+    --color-error: #ba1a1a;
+    --color-primary-container: #4f46e5;
+    --color-surface-dim: #d2d9f4;
+    --color-inverse-surface: #283044;
+    --color-on-secondary-container: #684000;
+    --color-background: #faf8ff;
+    --color-surface-container-low: #f2f3ff;
+    --color-on-primary: #ffffff;
+    --color-on-secondary: #ffffff;
+    --color-on-primary-container: #dad7ff;
+    --color-surface-container-highest: #dae2fd;
+    --color-on-surface: #131b2e;
+    --color-primary: #3525cd;
+    --color-secondary-fixed-dim: #ffb95f;
+    --color-on-tertiary-fixed: #002113;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-tint: #4d44e3;
+    --color-surface-container: #eaedff;
+    --color-on-surface-variant: #464555;
+    --color-on-error-container: #93000a;
+    --color-on-tertiary: #ffffff;
+    --color-outline: #777587;
+    --color-tertiary-fixed-dim: #4edea3;
+    --color-inverse-primary: #c3c0ff;
+    --color-surface-container-high: #e2e7ff;
+    --color-error-container: #ffdad6;
+    --color-on-tertiary-fixed-variant: #005236;
+    --color-tertiary: #005338;
+    --color-primary-fixed: #e2dfff;
+    --color-tertiary-fixed: #6ffbbe;
+    --color-on-background: #131b2e;
+    --color-tertiary-container: #006e4b;
+    --color-surface: #faf8ff;
+    --color-primary-fixed-dim: #c3c0ff;
+    --color-surface-variant: #dae2fd;
+    --color-on-primary-fixed: #0f0069;
+
+    /* ---- Stitch spacing ---- */
+    --spacing-margin-tablet: 2rem;
+    --spacing-margin-desktop: 3rem;
+    --spacing-margin: 1rem;
+    --spacing-gutter: 1.25rem;
+    --spacing-space-sm: 0.5rem;
+    --spacing-gutter-desktop: 1.5rem;
+    --spacing-space-xs: 0.25rem;
+    --spacing-space-lg: 1.5rem;
+    --spacing-space-xl: 2.5rem;
+    --spacing-space-md: 1rem;
+
+    /* ---- Stitch font families ---- */
+    --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-label-badge: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-body-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-body-md: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-body-lg: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-headline-sm: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-headline-md: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-headline-lg: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-headline-lg-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-display-hero: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-display-hero-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-label-currency-md: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-label-currency-lg: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-button-text: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+    /* ---- Stitch text sizes ---- */
+    --text-label-badge: 11px;
+    --text-label-badge--line-height: 14px;
+    --text-label-badge--letter-spacing: 0.04em;
+    --text-label-badge--font-weight: 600;
+
+    --text-body-sm: 12px;
+    --text-body-sm--line-height: 16px;
+    --text-body-sm--letter-spacing: 0.01em;
+    --text-body-sm--font-weight: 400;
+
+    --text-body-md: 14px;
+    --text-body-md--line-height: 20px;
+    --text-body-md--letter-spacing: 0em;
+    --text-body-md--font-weight: 400;
+
+    --text-body-lg: 16px;
+    --text-body-lg--line-height: 24px;
+    --text-body-lg--letter-spacing: -0.005em;
+    --text-body-lg--font-weight: 400;
+
+    --text-headline-sm: 16px;
+    --text-headline-sm--line-height: 24px;
+    --text-headline-sm--letter-spacing: 0em;
+    --text-headline-sm--font-weight: 600;
+
+    --text-headline-md: 20px;
+    --text-headline-md--line-height: 28px;
+    --text-headline-md--letter-spacing: -0.01em;
+    --text-headline-md--font-weight: 600;
+
+    --text-headline-lg: 32px;
+    --text-headline-lg--line-height: 40px;
+    --text-headline-lg--letter-spacing: -0.02em;
+    --text-headline-lg--font-weight: 700;
+
+    --text-headline-lg-mobile: 24px;
+    --text-headline-lg-mobile--line-height: 32px;
+    --text-headline-lg-mobile--letter-spacing: -0.01em;
+    --text-headline-lg-mobile--font-weight: 700;
+
+    --text-display-hero: 48px;
+    --text-display-hero--line-height: 56px;
+    --text-display-hero--letter-spacing: -0.03em;
+    --text-display-hero--font-weight: 800;
+
+    --text-display-hero-mobile: 32px;
+    --text-display-hero-mobile--line-height: 40px;
+    --text-display-hero-mobile--letter-spacing: -0.02em;
+    --text-display-hero-mobile--font-weight: 800;
+
+    --text-label-currency-md: 18px;
+    --text-label-currency-md--line-height: 22px;
+    --text-label-currency-md--letter-spacing: -0.01em;
+    --text-label-currency-md--font-weight: 700;
+
+    --text-label-currency-lg: 24px;
+    --text-label-currency-lg--line-height: 28px;
+    --text-label-currency-lg--letter-spacing: -0.02em;
+    --text-label-currency-lg--font-weight: 800;
+
+    --text-button-text: 14px;
+    --text-button-text--line-height: 20px;
+    --text-button-text--letter-spacing: 0em;
+    --text-button-text--font-weight: 600;
+}
+
+html {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}

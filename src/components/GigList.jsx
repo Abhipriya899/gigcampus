@@ -1,13 +1,14 @@
-import TrustBadge from './TrustBadge'
-import RatingForm from './RatingForm'
 import { useEffect, useState } from 'react'
 import {
     collection, onSnapshot, query, where,
     doc, setDoc, writeBatch, serverTimestamp,
 } from 'firebase/firestore'
+import { CheckCircle2, Inbox } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../AuthContext'
 import GigCard from './GigCard'
+import TrustBadge from './TrustBadge'
+import RatingForm from './RatingForm'
 
 export default function GigList({ mode }) {
     const { user, profile } = useAuth()
@@ -15,7 +16,6 @@ export default function GigList({ mode }) {
     const [apps, setApps] = useState([])
     const [loading, setLoading] = useState(true)
 
-    // Gigs: poster sees their own, student sees open ones
     useEffect(() => {
         const q =
             mode === 'mine'
@@ -37,7 +37,6 @@ export default function GigList({ mode }) {
         )
     }, [mode, user.uid])
 
-    // Applications: poster sees applicants to their gigs, student sees their own
     useEffect(() => {
         const field = mode === 'mine' ? 'posterId' : 'workerId'
         const q = query(collection(db, 'applications'), where(field, '==', user.uid))
@@ -50,7 +49,6 @@ export default function GigList({ mode }) {
 
     const apply = async (gig) => {
         try {
-            // Same ID every time = a student can't apply twice to the same gig
             await setDoc(doc(db, 'applications', `${gig.id}_${user.uid}`), {
                 gigId: gig.id,
                 gigTitle: gig.title,
@@ -87,12 +85,14 @@ export default function GigList({ mode }) {
         }
     }
 
-    if (loading) return <p className="text-gray-500">Loading gigs...</p>
+    if (loading) return <span className="loading loading-spinner loading-md" />
+
     if (gigs.length === 0)
         return (
-            <p className="text-gray-500">
-                {mode === 'mine' ? "You haven't posted any gigs yet." : 'No open gigs right now. Check back soon!'}
-            </p>
+            <div className="text-center py-10 opacity-60">
+                <Inbox className="mx-auto mb-2" size={36} />
+                <p>{mode === 'mine' ? "You haven't posted any gigs yet." : 'No open gigs right now. Check back soon!'}</p>
+            </div>
         )
 
     return (
@@ -100,18 +100,16 @@ export default function GigList({ mode }) {
             {gigs.map((g) => {
                 const gigApps = apps.filter((a) => a.gigId === g.id)
 
-                // ---------- STUDENT VIEW ----------
                 if (mode === 'open') {
                     const applied = gigApps.length > 0
                     return (
                         <GigCard key={g.id} gig={g}>
                             {applied ? (
-                                <p className="text-sm text-indigo-600 font-medium">✅ Applied. Waiting for the poster.</p>
+                                <div className="badge badge-info badge-lg gap-1">
+                                    <CheckCircle2 size={14} /> Applied. Waiting for the poster
+                                </div>
                             ) : (
-                                <button
-                                    onClick={() => apply(g)}
-                                    className="w-full bg-indigo-600 text-white rounded-lg p-2 font-medium"
-                                >
+                                <button onClick={() => apply(g)} className="btn btn-primary btn-block">
                                     Apply for this gig
                                 </button>
                             )}
@@ -119,31 +117,23 @@ export default function GigList({ mode }) {
                     )
                 }
 
-                // ---------- POSTER VIEW ----------
                 return (
                     <GigCard key={g.id} gig={g}>
                         {g.status === 'filled' ? (
                             <div className="space-y-2">
-                                <p className="text-sm font-medium text-green-700">
-                                    ✅ Filled by {g.acceptedWorkerName}
-                                </p>
+                                <div className="badge badge-success badge-lg gap-1">
+                                    <CheckCircle2 size={14} /> Filled by {g.acceptedWorkerName}
+                                </div>
                                 <RatingForm gigId={g.id} toUserId={g.acceptedWorkerId} toName={g.acceptedWorkerName} />
                             </div>
                         ) : (
-                            <div className="border-t pt-2 space-y-2">
-                                <p className="text-sm font-medium">Applicants ({gigApps.length})</p>
-                                {gigApps.length === 0 && (
-                                    <p className="text-xs text-gray-500">No applicants yet.</p>
-                                )}
+                            <div className="border-t border-base-200 pt-3 space-y-2">
+                                <p className="text-sm font-semibold">Applicants ({gigApps.length})</p>
+                                {gigApps.length === 0 && <p className="text-xs opacity-60">No applicants yet.</p>}
                                 {gigApps.map((a) => (
-                                    <div key={a.id} className="flex justify-between items-center bg-gray-50 rounded-lg p-2">
+                                    <div key={a.id} className="flex justify-between items-center gap-2 bg-base-200 rounded-lg p-2">
                                         <TrustBadge userId={a.workerId} name={a.workerName} />
-                                        <button
-                                            onClick={() => accept(g, a)}
-                                            className="text-sm bg-green-600 text-white rounded-lg px-3 py-1"
-                                        >
-                                            Accept
-                                        </button>
+                                        <button onClick={() => accept(g, a)} className="btn btn-success btn-sm">Accept</button>
                                     </div>
                                 ))}
                             </div>

@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useAuth } from '../AuthContext'
+import Icon from '../components/Icon'
 import PostGigForm from '../components/PostGigForm'
 import GigList from '../components/GigList'
 import MyApplications from '../components/MyApplications'
@@ -6,47 +8,114 @@ import VerificationCard from '../components/VerificationCard'
 
 export default function Dashboard() {
     const { profile, logout } = useAuth()
+    const [tab, setTab] = useState(null)
 
-    if (!profile) return <p className="p-6">Loading your profile...</p>
+    if (!profile) return <span className="loading loading-spinner loading-lg m-10" />
 
     const isPoster = profile.role === 'poster'
+    const tabs = isPoster
+        ? [['post', 'Post a Gig'], ['mine', 'My Gigs']]
+        : [['find', 'Explore Gigs'], ['apps', 'My Applications']]
+    const active = tab ?? tabs[0][0]
+    const activeLabel = tabs.find(([k]) => k === active)[1]
+    const wide = active === 'apps'
+    const initial = (profile.name || '?').trim().charAt(0).toUpperCase()
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <header className="bg-white shadow-sm">
-                <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-indigo-600">GigCampus</h1>
-                    <div className="text-sm text-right">
-                        <p className="font-medium">{profile.name}</p>
-                        <p className="text-gray-500">{isPoster ? 'Gig Poster' : 'Student Worker'}</p>
+        <div className="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+            {/* Header */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+                <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-desktop flex items-center justify-between gap-space-md">
+                    <div className="flex items-center gap-space-lg flex-shrink-0">
+                        <div className="flex items-center gap-space-sm">
+                            <Icon name="work" fill className="text-primary text-3xl" />
+                            <span className="hidden sm:inline font-headline-md text-headline-md font-bold tracking-tight text-primary">
+                                GigCampus
+                            </span>
+                        </div>
+                        <div className="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-badge text-label-badge">
+                            <Icon name="location_on" className="text-base text-primary" />
+                            <span>Siliguri</span>
+                        </div>
                     </div>
-                    <button onClick={logout} className="text-sm text-red-600">Log out</button>
+
+                    <nav className="flex items-center gap-space-xs font-button-text text-button-text">
+                        {tabs.map(([key, label]) => (
+                            <button
+                                key={key}
+                                onClick={() => setTab(key)}
+                                className={`px-space-md py-2 transition-all rounded-xl whitespace-nowrap ${active === key
+                                        ? 'bg-primary-container text-on-primary font-bold shadow-sm'
+                                        : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    <div className="flex items-center gap-space-md flex-shrink-0">
+                        {isPoster && (
+                            <button
+                                onClick={() => setTab('post')}
+                                className="hidden md:inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-secondary-container text-on-secondary-container font-button-text text-button-text hover:bg-secondary-fixed-dim transition-all shadow-[0_2px_8px_rgba(254,166,25,0.25)]"
+                            >
+                                <Icon name="bolt" className="text-lg" />
+                                <span>Post a Gig</span>
+                            </button>
+                        )}
+                        <div className="hidden sm:block text-right leading-tight">
+                            <p className="font-body-md text-body-md font-semibold">{profile.name}</p>
+                            <p className="font-body-sm text-body-sm text-outline">{isPoster ? 'Gig Poster' : 'Student'}</p>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-primary-container text-on-primary-container grid place-items-center font-bold ring-2 ring-primary-fixed">
+                            {initial}
+                        </div>
+                        <button
+                            onClick={logout}
+                            title="Log out"
+                            className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        >
+                            <Icon name="logout" className="text-xl" />
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <main className="max-w-2xl mx-auto p-4 space-y-6">
-                <VerificationCard />
-                {isPoster ? (
-                    <>
-                        <PostGigForm />
-                        <section>
-                            <h2 className="text-lg font-bold mb-3">Your gigs</h2>
-                            <GigList mode="mine" />
-                        </section>
-                    </>
-                ) : (
-                    <>
-                        <section>
-                            <h2 className="text-lg font-bold mb-3">My applications</h2>
-                            <MyApplications />
-                        </section>
-                        <section>
-                            <h2 className="text-lg font-bold mb-3">Open gigs near you</h2>
-                            <GigList mode="open" />
-                        </section>
-                    </>
-                )}
+            <main className="w-full pt-20 bg-background min-h-screen">
+                {/* Breadcrumb */}
+                <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-sm">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-space-xs font-body-sm text-body-sm text-outline">
+                        <span>Campus Hub</span>
+                        <Icon name="chevron_right" className="text-sm" />
+                        <span className="text-on-surface-variant font-medium">{activeLabel}</span>
+                    </nav>
+                </div>
+
+                <div
+                    className={`${wide ? 'max-w-[1280px]' : 'max-w-2xl'} mx-auto px-margin md:px-margin-desktop py-space-md space-y-space-lg`}
+                >
+                    <VerificationCard />
+                    {active === 'post' && <PostGigForm />}
+                    {active === 'mine' && <GigList mode="mine" />}
+                    {active === 'find' && <GigList mode="open" />}
+                    {active === 'apps' && <MyApplications />}
+                </div>
             </main>
+
+            {/* Footer */}
+            <footer className="w-full bg-surface-container-lowest mt-space-xl shadow-[0_-1px_6px_rgba(0,0,0,0.02)]">
+                <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-md">
+                    <div className="flex items-center gap-space-sm">
+                        <span className="font-headline-sm text-headline-sm font-bold text-primary">GigCampus</span>
+                        <span className="text-outline">•</span>
+                        <span className="font-body-sm text-body-sm text-on-surface-variant">
+                            Verified micro-work network for college students
+                        </span>
+                    </div>
+                    <div className="font-body-sm text-body-sm text-outline">© 2026 GigCampus. Built for Hack-A-Throne.</div>
+                </div>
+            </footer>
         </div>
     )
 }

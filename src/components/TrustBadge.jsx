@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { BadgeCheck, Star } from 'lucide-react'
 import { db } from '../firebase'
 
 export default function TrustBadge({ userId, name }) {
@@ -11,17 +12,19 @@ export default function TrustBadge({ userId, name }) {
     )
 
     return (
-        <span className="inline-flex items-center gap-1 flex-wrap text-sm">
+        <span className="inline-flex items-center gap-1 flex-wrap">
             <span className="font-medium">{name}</span>
             {u?.verified ? (
-                <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">✓ Verified</span>
+                <span className="badge badge-success badge-sm gap-1"><BadgeCheck size={12} /> Verified</span>
             ) : (
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Unverified</span>
+                <span className="badge badge-ghost badge-sm">Unverified</span>
             )}
             {u?.ratingCount > 0 ? (
-                <span className="text-xs text-yellow-600">★ {u.rating} ({u.ratingCount})</span>
+                <span className="badge badge-warning badge-outline badge-sm gap-1">
+                    <Star size={12} /> {u.rating} ({u.ratingCount})
+                </span>
             ) : (
-                <span className="text-xs text-gray-400">New</span>
+                <span className="badge badge-ghost badge-sm">New</span>
             )}
         </span>
     )
