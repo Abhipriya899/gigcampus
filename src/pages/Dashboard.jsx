@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useAuth } from '../AuthContext'
 import Icon from '../components/Icon'
-import PostGigForm from '../components/PostGigForm'
-import GigList from '../components/GigList'
+import ExploreGigs from '../components/ExploreGigs'
 import MyApplications from '../components/MyApplications'
+import PosterWorkspace from '../components/PosterWorkspace'
 import VerificationCard from '../components/VerificationCard'
 
 export default function Dashboard() {
@@ -14,16 +14,14 @@ export default function Dashboard() {
 
     const isPoster = profile.role === 'poster'
     const tabs = isPoster
-        ? [['post', 'Post a Gig'], ['mine', 'My Gigs']]
+        ? [['post', 'Post a Gig']]
         : [['find', 'Explore Gigs'], ['apps', 'My Applications']]
     const active = tab ?? tabs[0][0]
     const activeLabel = tabs.find(([k]) => k === active)[1]
-    const wide = active === 'apps'
     const initial = (profile.name || '?').trim().charAt(0).toUpperCase()
 
     return (
         <div className="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
-            {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
                 <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-desktop flex items-center justify-between gap-space-md">
                     <div className="flex items-center gap-space-lg flex-shrink-0">
@@ -55,15 +53,6 @@ export default function Dashboard() {
                     </nav>
 
                     <div className="flex items-center gap-space-md flex-shrink-0">
-                        {isPoster && (
-                            <button
-                                onClick={() => setTab('post')}
-                                className="hidden md:inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-secondary-container text-on-secondary-container font-button-text text-button-text hover:bg-secondary-fixed-dim transition-all shadow-[0_2px_8px_rgba(254,166,25,0.25)]"
-                            >
-                                <Icon name="bolt" className="text-lg" />
-                                <span>Post a Gig</span>
-                            </button>
-                        )}
                         <div className="hidden sm:block text-right leading-tight">
                             <p className="font-body-md text-body-md font-semibold">{profile.name}</p>
                             <p className="font-body-sm text-body-sm text-outline">{isPoster ? 'Gig Poster' : 'Student'}</p>
@@ -83,7 +72,6 @@ export default function Dashboard() {
             </header>
 
             <main className="w-full pt-20 bg-background min-h-screen">
-                {/* Breadcrumb */}
                 <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-sm">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-space-xs font-body-sm text-body-sm text-outline">
                         <span>Campus Hub</span>
@@ -92,18 +80,14 @@ export default function Dashboard() {
                     </nav>
                 </div>
 
-                <div
-                    className={`${wide ? 'max-w-[1280px]' : 'max-w-2xl'} mx-auto px-margin md:px-margin-desktop py-space-md space-y-space-lg`}
-                >
+                <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-md space-y-space-lg">
                     <VerificationCard />
-                    {active === 'post' && <PostGigForm />}
-                    {active === 'mine' && <GigList mode="mine" />}
-                    {active === 'find' && <GigList mode="open" />}
+                    {active === 'post' && <PosterWorkspace />}
+                    {active === 'find' && <ExploreGigs goToApps={() => setTab('apps')} />}
                     {active === 'apps' && <MyApplications />}
                 </div>
             </main>
 
-            {/* Footer */}
             <footer className="w-full bg-surface-container-lowest mt-space-xl shadow-[0_-1px_6px_rgba(0,0,0,0.02)]">
                 <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-md">
                     <div className="flex items-center gap-space-sm">

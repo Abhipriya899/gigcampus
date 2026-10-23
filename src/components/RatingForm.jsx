@@ -34,7 +34,7 @@ function Stars({ value, onPick }) {
 
 export default function RatingForm({ gigId, toUserId, toName }) {
     const { user, profile } = useAuth()
-    const reviewId = `${gigId}_${user.uid}`
+    const reviewId = `${gigId}_${user.uid}_${toUserId}`
     const [existing, setExisting] = useState(undefined)
     const [stars, setStars] = useState(5)
     const [tags, setTags] = useState([])
