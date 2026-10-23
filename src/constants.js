@@ -38,3 +38,24 @@ export function timeAgo(seconds) {
     if (h < 24) return `${h} hrs ago`
     return `${Math.round(h / 24)} days ago`
 }
+export const AREAS = [
+    'Sevoke Road',
+    'Vega Circle / 2nd Mile',
+    'Hakim Para',
+    'Panitanki',
+    'Matigara',
+    'Shivmandir',
+    'NBU Campus',
+    'Siliguri College Area',
+    'Pradhan Nagar',
+    'Bidhan Market',
+    'Champasari',
+    'Other',
+]
+
+// "all" shows every gig. Older gigs without an area are matched by their location text.
+export const matchesArea = (g, area) => {
+    if (!area || area === 'all') return true
+    if (g.area) return g.area === area
+    return (g.location ?? '').toLowerCase().includes(area.toLowerCase().split(' ')[0])
+}

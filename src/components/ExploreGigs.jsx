@@ -4,7 +4,7 @@ import { db } from '../firebase'
 import { useAuth } from '../AuthContext'
 import Icon from './Icon'
 import TrustBadge from './TrustBadge'
-import { CATEGORIES, catOf, endOf, fmtDate, fmtTime, inr, startOf, todayStr } from '../constants'
+import { CATEGORIES, catOf, endOf, fmtDate, fmtTime, inr, matchesArea, startOf, todayStr } from '../constants'
 
 const selectCls =
     'appearance-none bg-surface-container-low text-on-surface-variant pl-3 pr-8 py-1.5 rounded-lg hover:bg-surface-container focus:outline-none cursor-pointer'
@@ -26,11 +26,13 @@ export default function ExploreGigs({ goToApps }) {
     const [apps, setApps] = useState([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [area, setArea] = useState('')
     const [cat, setCat] = useState('all')
     const [pay, setPay] = useState('all')
     const [dur, setDur] = useState('all')
     const [timing, setTiming] = useState('all')
+
+    // Area comes from the location dropdown in the page header (saved on the profile)
+    const area = profile.area ?? 'all'
 
     useEffect(() => {
         const q = query(collection(db, 'gigs'), where('status', '==', 'open'))
@@ -57,6 +59,7 @@ export default function ExploreGigs({ goToApps }) {
     }, [user.uid])
 
     const today = todayStr()
+
     const upcoming = useMemo(
         () =>
             gigs
@@ -64,16 +67,20 @@ export default function ExploreGigs({ goToApps }) {
                 .sort((a, b) => (startOf(a)?.getTime() ?? 9e15) - (startOf(b)?.getTime() ?? 9e15)),
         [gigs, today]
     )
+
     const urgentCount = upcoming.filter((g) => g.date === today).length
 
     const visible = useMemo(() => {
         const s = search.trim().toLowerCase()
-        const a = area.trim().toLowerCase()
         return upcoming.filter((g) => {
             if (cat === 'today' && g.date !== today) return false
             if (cat !== 'all' && cat !== 'today' && g.category !== cat) return false
-            if (s && !`${g.title} ${g.description} ${g.posterName} ${g.location} ${g.category}`.toLowerCase().includes(s)) return false
-            if (a && !(g.location ?? '').toLowerCase().includes(a)) return false
+            if (
+                s &&
+                !`${g.title} ${g.description} ${g.posterName} ${g.location} ${g.category}`.toLowerCase().includes(s)
+            )
+                return false
+            if (!matchesArea(g, area)) return false
             if (pay !== 'all' && g.hourlyRate < Number(pay)) return false
             if (dur === 'short' && g.maxHours > 4) return false
             if (dur === 'long' && g.maxHours < 5) return false
@@ -110,7 +117,11 @@ export default function ExploreGigs({ goToApps }) {
     }
 
     const clearFilters = () => {
-        setSearch(''); setArea(''); setCat('all'); setPay('all'); setDur('all'); setTiming('all')
+        setSearch('')
+        setCat('all')
+        setPay('all')
+        setDur('all')
+        setTiming('all')
     }
 
     const chips = [
@@ -124,29 +135,18 @@ export default function ExploreGigs({ goToApps }) {
             {/* Command & filter panel */}
             <section className="pb-space-lg">
                 <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md lg:p-space-lg flex flex-col gap-space-md">
-                    <div className="flex flex-col lg:flex-row gap-space-sm items-stretch">
-                        <div className="flex-1 relative flex items-center">
-                            <Icon name="search" className="absolute left-4 text-outline text-xl" />
-                            <input
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search gigs (e.g. cafe helper, puja stall, tutoring)..."
-                                className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-inner"
-                            />
-                        </div>
-                        <div className="flex items-center gap-space-xs px-space-md py-3 bg-surface-container rounded-xl text-on-surface-variant font-label-badge text-label-badge flex-shrink-0">
-                            <Icon name="near_me" className="text-primary text-base" />
-                            <input
-                                value={area}
-                                onChange={(e) => setArea(e.target.value)}
-                                placeholder="Filter by area, e.g. Sevoke Road"
-                                className="bg-transparent focus:outline-none font-medium text-on-surface placeholder:text-outline w-52"
-                            />
-                            <Icon name="tune" className="text-outline text-sm ml-auto" />
-                        </div>
+                    {/* Search */}
+                    <div className="relative flex items-center">
+                        <Icon name="search" className="absolute left-4 text-outline text-xl" />
+                        <input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search gigs (e.g. cafe helper, puja stall, tutoring)..."
+                            className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-inner"
+                        />
                     </div>
 
-                    {/* Chips */}
+                    {/* Category chips */}
                     <div className="flex items-center gap-space-xs overflow-x-auto pb-1 pt-0.5">
                         {chips.map(([key, label, count]) => (
                             <button
@@ -168,7 +168,7 @@ export default function ExploreGigs({ goToApps }) {
                         ))}
                     </div>
 
-                    {/* Dropdowns */}
+                    {/* Dropdown filters */}
                     <div className="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs text-body-sm font-body-sm">
                         <div className="flex flex-wrap items-center gap-space-xs">
                             <Select value={pay} onChange={setPay}>
@@ -201,6 +201,7 @@ export default function ExploreGigs({ goToApps }) {
 
             {/* Feed + sidebar */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+                {/* Gig feed */}
                 <div className="lg:col-span-8 flex flex-col gap-space-md">
                     {loading ? (
                         <span className="loading loading-spinner loading-md" />
@@ -209,7 +210,7 @@ export default function ExploreGigs({ goToApps }) {
                             <Icon name="inbox" className="text-5xl text-outline" />
                             <p className="font-headline-sm text-headline-sm text-on-surface mt-space-sm">No gigs match right now</p>
                             <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                                Try clearing your filters or check back soon.
+                                Try clearing your filters, or pick "All Siliguri areas" in the location dropdown.
                             </p>
                             <button
                                 onClick={clearFilters}
@@ -235,6 +236,7 @@ export default function ExploreGigs({ goToApps }) {
                                     className="bg-surface-container-lowest rounded-2xl shadow-sm hover:shadow-md transition-all p-space-md lg:p-space-lg relative overflow-hidden group"
                                 >
                                     <div className="absolute -top-12 -right-12 w-32 h-32 bg-secondary-container/10 rounded-full blur-2xl pointer-events-none"></div>
+
                                     <div className="flex flex-col gap-space-md relative z-10">
                                         {/* Pills */}
                                         <div className="flex flex-wrap items-center gap-space-xs">
@@ -384,11 +386,15 @@ export default function ExploreGigs({ goToApps }) {
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2 text-center">
                             <div className="bg-surface-container-low rounded-xl py-2">
-                                <div className="font-label-currency-md text-label-currency-md text-secondary font-extrabold">{pending}</div>
+                                <div className="font-label-currency-md text-label-currency-md text-secondary font-extrabold">
+                                    {pending}
+                                </div>
                                 <div className="font-body-sm text-body-sm text-on-surface-variant">Under review</div>
                             </div>
                             <div className="bg-surface-container-low rounded-xl py-2">
-                                <div className="font-label-currency-md text-label-currency-md text-tertiary font-extrabold">{accepted}</div>
+                                <div className="font-label-currency-md text-label-currency-md text-tertiary font-extrabold">
+                                    {accepted}
+                                </div>
                                 <div className="font-body-sm text-body-sm text-on-surface-variant">Accepted</div>
                             </div>
                         </div>

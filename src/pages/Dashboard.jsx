@@ -1,40 +1,43 @@
 import { useState } from 'react'
 import { useAuth } from '../AuthContext'
 import Icon from '../components/Icon'
+import AreaSelect from '../components/AreaSelect'
 import ExploreGigs from '../components/ExploreGigs'
 import MyApplications from '../components/MyApplications'
+import MyPostedGigs from '../components/MyPostedGigs'
 import PosterWorkspace from '../components/PosterWorkspace'
 import VerificationCard from '../components/VerificationCard'
 
 export default function Dashboard() {
     const { profile, logout } = useAuth()
     const [tab, setTab] = useState(null)
+    const [manageId, setManageId] = useState(null)
 
     if (!profile) return <span className="loading loading-spinner loading-lg m-10" />
 
     const isPoster = profile.role === 'poster'
     const tabs = isPoster
-        ? [['post', 'Post a Gig']]
+        ? [['post', 'Post a Gig'], ['mine', 'My Gigs']]
         : [['find', 'Explore Gigs'], ['apps', 'My Applications']]
     const active = tab ?? tabs[0][0]
     const activeLabel = tabs.find(([k]) => k === active)[1]
     const initial = (profile.name || '?').trim().charAt(0).toUpperCase()
 
+    const manage = (id) => {
+        setManageId(id)
+        setTab('post')
+    }
+
     return (
         <div className="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+            {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
                 <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-desktop flex items-center justify-between gap-space-md">
-                    <div className="flex items-center gap-space-lg flex-shrink-0">
-                        <div className="flex items-center gap-space-sm">
-                            <Icon name="work" fill className="text-primary text-3xl" />
-                            <span className="hidden sm:inline font-headline-md text-headline-md font-bold tracking-tight text-primary">
-                                GigCampus
-                            </span>
-                        </div>
-                        <div className="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-badge text-label-badge">
-                            <Icon name="location_on" className="text-base text-primary" />
-                            <span>Siliguri</span>
-                        </div>
+                    <div className="flex items-center gap-space-sm flex-shrink-0">
+                        <Icon name="work" fill className="text-primary text-3xl" />
+                        <span className="hidden sm:inline font-headline-md text-headline-md font-bold tracking-tight text-primary">
+                            GigCampus
+                        </span>
                     </div>
 
                     <nav className="flex items-center gap-space-xs font-button-text text-button-text">
@@ -72,17 +75,20 @@ export default function Dashboard() {
             </header>
 
             <main className="w-full pt-20 bg-background min-h-screen">
-                <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-sm">
+                {/* Breadcrumb + location */}
+                <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-sm flex items-center justify-between gap-space-sm flex-wrap">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-space-xs font-body-sm text-body-sm text-outline">
                         <span>Campus Hub</span>
                         <Icon name="chevron_right" className="text-sm" />
                         <span className="text-on-surface-variant font-medium">{activeLabel}</span>
                     </nav>
+                    <AreaSelect />
                 </div>
 
                 <div className="max-w-[1280px] mx-auto px-margin md:px-margin-desktop py-space-md space-y-space-lg">
                     <VerificationCard />
-                    {active === 'post' && <PosterWorkspace />}
+                    {active === 'post' && <PosterWorkspace focusId={manageId} />}
+                    {active === 'mine' && <MyPostedGigs onManage={manage} onNew={() => setTab('post')} />}
                     {active === 'find' && <ExploreGigs goToApps={() => setTab('apps')} />}
                     {active === 'apps' && <MyApplications />}
                 </div>

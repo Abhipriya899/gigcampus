@@ -6,11 +6,15 @@ import Icon from './Icon'
 import PostGigForm from './PostGigForm'
 import ManageGigs from './ManageGigs'
 
-export default function PosterWorkspace() {
+export default function PosterWorkspace({ focusId }) {
     const { user, profile } = useAuth()
     const [gigs, setGigs] = useState([])
     const [apps, setApps] = useState([])
-    const [selectedId, setSelectedId] = useState(null)
+    const [selectedId, setSelectedId] = useState(focusId ?? null)
+
+    useEffect(() => {
+        if (focusId) setSelectedId(focusId)
+    }, [focusId])
 
     useEffect(() => {
         const q = query(collection(db, 'gigs'), where('posterId', '==', user.uid))

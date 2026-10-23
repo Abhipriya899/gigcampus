@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../AuthContext'
 import Icon from './Icon'
-import { CATEGORIES, PERKS, todayStr, inr } from '../constants'
+import { AREAS, CATEGORIES, PERKS, todayStr, inr } from '../constants'
 
 const DURATIONS = [
     [2, '2 hours'],
@@ -31,9 +31,19 @@ const inputCls =
 
 export default function PostGigForm({ onPosted }) {
     const { user, profile } = useAuth()
-    const [form, setForm] = useState(empty)
+    const [form, setForm] = useState(() => ({
+        ...empty(),
+        area: profile.area && profile.area !== 'all' ? profile.area : AREAS[0],
+    }))
     const [busy, setBusy] = useState(false)
     const [toast, setToast] = useState(null)
+
+    // Follow the location dropdown in the page header
+    useEffect(() => {
+        if (profile.area && profile.area !== 'all') {
+            setForm((f) => ({ ...f, area: profile.area }))
+        }
+    }, [profile.area])
 
     const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
     const update = (e) => set(e.target.name, e.target.value)
@@ -61,7 +71,8 @@ export default function PostGigForm({ onPosted }) {
                 description: form.description.trim(),
                 date: form.date,
                 startTime: form.startTime,
-                location: form.location.trim(),
+                location: `${form.location.trim()}, ${form.area}`,
+                area: form.area,
                 hourlyRate: Number(form.hourlyRate),
                 maxHours: Number(form.maxHours),
                 spots: Number(form.spots),
@@ -73,7 +84,7 @@ export default function PostGigForm({ onPosted }) {
                 status: 'open',
                 createdAt: serverTimestamp(),
             })
-            setForm(empty())
+            setForm({ ...empty(), area: form.area })
             onPosted?.(ref.id)
             showToast('ok', 'Gig published! Students can see it right now.')
         } catch (err) {
@@ -216,19 +227,40 @@ export default function PostGigForm({ onPosted }) {
                     </div>
                 </div>
 
-                {/* Location */}
-                <div className="flex flex-col gap-1.5">
-                    <label className="font-button-text text-button-text text-on-surface font-semibold">Location / Landmark</label>
-                    <div className="relative">
-                        <Icon name="location_on" className="absolute left-3.5 top-3.5 text-outline text-xl" />
-                        <input
-                            name="location"
-                            required
-                            value={form.location}
-                            onChange={update}
-                            placeholder="e.g. Sevoke Road, Siliguri"
-                            className={`${inputCls} pl-11 pr-4`}
-                        />
+                {/* Location: area + landmark */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-button-text text-button-text text-on-surface font-semibold">Area</label>
+                        <div className="relative">
+                            <Icon name="location_on" className="absolute left-3.5 top-3.5 text-outline text-xl pointer-events-none" />
+                            <select
+                                name="area"
+                                value={form.area}
+                                onChange={update}
+                                className={`${inputCls} pl-11 pr-8 appearance-none`}
+                            >
+                                {AREAS.map((a) => (
+                                    <option key={a} value={a}>{a}</option>
+                                ))}
+                            </select>
+                            <Icon name="expand_more" className="absolute right-3 top-3.5 text-outline pointer-events-none text-lg" />
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-button-text text-button-text text-on-surface font-semibold">
+                            Landmark / Shop name
+                        </label>
+                        <div className="relative">
+                            <Icon name="pin_drop" className="absolute left-3.5 top-3.5 text-outline text-xl" />
+                            <input
+                                name="location"
+                                required
+                                value={form.location}
+                                onChange={update}
+                                placeholder="e.g. Near Big Bazaar"
+                                className={`${inputCls} pl-11 pr-4`}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -287,7 +319,9 @@ export default function PostGigForm({ onPosted }) {
 
                 {/* Perks */}
                 <div className="flex flex-col gap-2 pt-1">
-                    <span className="font-button-text text-button-text text-on-surface font-semibold">Requirements &amp; Perks</span>
+                    <span className="font-button-text text-button-text text-on-surface font-semibold">
+                        Requirements &amp; Perks
+                    </span>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {PERKS.map((p) => (
                             <label
